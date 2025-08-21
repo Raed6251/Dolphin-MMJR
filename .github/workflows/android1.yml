@@ -1,0 +1,37 @@
+name: Android Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r21e
+
+      - name: Build Debug APK
+        working-directory: Source/Android   # 👈 المسار اللي فيه gradlew
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace --info
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mmjr-debug
+          path: 'Source/Android/app/build/outputs/apk/debug/*.apk'
