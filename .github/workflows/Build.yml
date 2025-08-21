@@ -1,0 +1,44 @@
+name: Build jMMJR APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ جلب الريبو
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      # 2️⃣ إعداد JDK متوافق
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 3️⃣ إعداد Android NDK
+      - name: Set up Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r21e
+
+      # 4️⃣ التأكد من صلاحيات gradlew
+      - name: Make gradlew executable
+        run: chmod +x Source/Android/gradlew
+
+      # 5️⃣ بناء Debug APK
+      - name: Build Debug APK
+        working-directory: Source/Android
+        run: ./gradlew assembleDebug --stacktrace --info
+
+      # 6️⃣ رفع الـ APK كـ Artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mmjr-debug
+          path: Source/Android/app/build/outputs/apk/debug/*.apk
